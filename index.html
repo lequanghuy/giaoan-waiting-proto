@@ -189,6 +189,16 @@ body.state-blocked .error-card{display:block}
 body.state-done .wait-banner,body.state-flagged .wait-banner{/* keep visible with different style */}
 body.state-done .checklist,body.state-flagged .checklist{display:none}
 body.state-done .slow-notice,body.state-flagged .slow-notice,body.state-blocked .slow-notice{display:none!important}
+
+.editor-doc{display:flex;flex-direction:column}
+body.state-running #content-skeleton{order:2}
+body.state-running #block-meta{order:1}
+body.state-running .khbd-title{order:3}
+body.state-running .helper-row{order:4}
+/* Keep filled after meta when done via default order */
+
+body.state-running #content-skeleton{max-height:220px;overflow:hidden;mask-image:linear-gradient(to bottom,#000 60%,transparent);-webkit-mask-image:linear-gradient(to bottom,#000 60%,transparent)}
+
 </style>
 </head>
 <body class="state-running">
