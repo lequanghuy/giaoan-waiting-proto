@@ -1,0 +1,910 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>⏳ Đang soạn… · GiaoAn AI</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --blue:#2563EB;--blue-h:#1D4ED8;--blue-s:#EFF6FF;--blue-b:#BFDBFE;
+  --g50:#F9FAFB;--g100:#F3F4F6;--g200:#E5E7EB;--g300:#D1D5DB;--g400:#9CA3AF;
+  --g500:#6B7280;--g600:#4B5563;--g700:#374151;--g800:#1F2937;--g900:#111827;
+  --green:#059669;--gs:#ECFDF5;--amber:#D97706;--as:#FFFBEB;--red:#DC2626;--rs:#FEF2F2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:Inter,system-ui,sans-serif;background:var(--g50);color:var(--g800);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;background:none}
+input,select,textarea{font-family:inherit;font-size:14px}
+a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
+.screen{display:none;min-height:100vh}.screen.active{display:flex;flex-direction:column}
+
+.topbar{height:56px;background:#fff;border-bottom:1px solid var(--g200);display:flex;align-items:center;justify-content:space-between;padding:0 28px;flex-shrink:0}
+.topbar-left{display:flex;align-items:center;gap:16px}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px;color:var(--g900);cursor:pointer}
+.logo-mark{width:28px;height:28px;border-radius:7px;background:linear-gradient(135deg,#2563EB,#3B82F6);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700}
+.breadcrumb{display:flex;align-items:center;gap:8px;color:var(--g500);font-size:13px}
+.breadcrumb .sep{color:var(--g300)}.breadcrumb .current{color:var(--g800);font-weight:500}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.avatar{width:32px;height:32px;border-radius:50%;background:var(--blue-s);color:var(--blue);display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;border:1px solid var(--blue-b)}
+.user-email{color:var(--g600);font-size:13px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:9px 16px;border-radius:8px;font-weight:550;font-size:14px;transition:all .15s;white-space:nowrap}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 1px 2px rgba(37,99,235,.25)}.btn-primary:hover{background:var(--blue-h)}
+.btn-secondary{background:#fff;color:var(--g700);border:1px solid var(--g200)}.btn-secondary:hover{background:var(--g50);border-color:var(--g300)}
+.btn-ghost{background:transparent;color:var(--g600);padding:8px 12px}.btn-ghost:hover{background:var(--g100);color:var(--g800)}
+.btn-sm{padding:6px 12px;font-size:13px}
+.btn-danger{background:var(--rs);color:var(--red);border:1px solid #FECACA}.btn-danger:hover{background:#FEE2E2}
+
+.page-body{flex:1;padding:20px 32px 32px;max-width:1080px;width:100%;margin:0 auto}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;gap:16px}
+.page-header h1{font-size:20px;font-weight:700;color:var(--g900)}
+.page-header p{color:var(--g500);margin-top:2px;font-size:13px}
+.filters{display:flex;gap:12px;margin-bottom:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.filter-chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:5px 12px;border-radius:20px;border:1px solid var(--g200);background:#fff;color:var(--g600);font-size:12px;font-weight:500}.chip:hover{border-color:var(--g300);background:var(--g50)}.chip.active{background:var(--blue-s);border-color:var(--blue-b);color:var(--blue);font-weight:600}
+.home-search{padding:6px 12px;border:1px solid var(--g200);border-radius:8px;background:#fff;color:var(--g800);outline:none;min-width:200px;font-size:13px}
+.home-search:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.table-card{background:#fff;border:1px solid var(--g200);border-radius:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+table{width:100%;border-collapse:collapse}
+thead th{text-align:left;padding:8px 12px;font-size:11px;font-weight:600;color:var(--g500);text-transform:uppercase;letter-spacing:.04em;background:var(--g50);border-bottom:1px solid var(--g200)}
+tbody tr{border-bottom:1px solid var(--g100);cursor:pointer}tbody tr:last-child{border-bottom:none}tbody tr:hover{background:var(--blue-s)}
+tbody td{padding:9px 12px;color:var(--g700)}tbody td.name{font-weight:550;color:var(--g900)}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:550}
+.badge-draft{background:var(--g100);color:var(--g600)}
+.badge-generated{background:var(--blue-s);color:var(--blue)}
+.badge-exported{background:var(--gs);color:var(--green)}
+.badge-running{background:var(--blue-s);color:var(--blue);border:1px solid var(--blue-b)}
+.badge-running .pulse-dot{width:6px;height:6px;border-radius:50%;background:var(--blue);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.85)}}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+.editor-layout{flex:1;display:flex;overflow:hidden;min-height:0}
+.editor-main{flex:1;overflow-y:auto;padding:20px 36px 64px;max-width:860px;margin:0 auto;width:100%}
+.editor-sidebar{width:260px;border-left:1px solid var(--g200);background:#fff;padding:20px 16px;overflow-y:auto;flex-shrink:0}
+.meta-fields{background:#fff;border:1px solid var(--g200);border-radius:10px;padding:12px;margin-bottom:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.meta-fields .mf{display:flex;flex-direction:column;gap:4px}
+.meta-fields .mf.full{grid-column:1/-1}
+.meta-fields label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--g400)}
+.meta-fields input{padding:8px 10px;border:1px solid var(--g200);border-radius:6px;background:var(--g50);color:var(--g800);outline:none}
+.meta-fields input:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+
+/* Waiting banner */
+.wait-banner{display:flex;flex-direction:column;gap:8px;padding:12px 14px;border-radius:10px;margin-bottom:10px;background:var(--blue-s);border:1px solid var(--blue-b)}
+.wait-banner.flagged{background:var(--as);border-color:#FDE68A}
+.wait-banner.done{background:var(--gs);border-color:#A7F3D0}
+.wait-banner-top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.wait-banner-left{display:flex;align-items:center;gap:10px;min-width:0}
+.wait-title{font-weight:600;font-size:14px;color:var(--blue)}
+.wait-banner.flagged .wait-title{color:var(--amber)}
+.wait-banner.done .wait-title{color:var(--green)}
+.wait-clock{font-variant-numeric:tabular-nums;font-weight:600;font-size:13px;color:var(--blue);background:#fff;padding:4px 10px;border-radius:6px;border:1px solid var(--blue-b);min-width:56px;text-align:center}
+.wait-banner.flagged .wait-clock{color:var(--amber);border-color:#FDE68A}
+.tip-row{font-size:12px;color:var(--g600);padding:6px 10px;background:rgba(255,255,255,.7);border-radius:6px;line-height:1.45;min-height:32px;display:flex;align-items:center;gap:6px}
+.tip-label{font-weight:600;color:var(--blue);flex-shrink:0;font-size:11px;text-transform:uppercase;letter-spacing:.03em}
+.wait-banner.flagged .tip-label{color:var(--amber)}
+.slow-notice{display:none;margin-top:2px;padding:8px 10px;border-radius:6px;background:#fff;border:1px solid var(--blue-b);font-size:12px;color:var(--g600);line-height:1.45}
+.slow-notice.show{display:block}
+
+/* Checklist */
+.checklist{display:flex;flex-direction:column;gap:4px;margin:4px 0 10px;padding:10px 12px;background:#fff;border:1px solid var(--g200);border-radius:10px}
+.checklist-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--g400);margin-bottom:4px}
+.check-item{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--g500);padding:4px 0}
+.check-item.done{color:var(--g700)}
+.check-item.active{color:var(--g900);font-weight:550}
+.check-icon{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px}
+.check-item.pending .check-icon{border:2px solid var(--g200);background:var(--g50)}
+.check-item.done .check-icon{background:var(--green);color:#fff;border:none}
+.check-item.active .check-icon{border:2px solid var(--blue-b);background:var(--blue-s)}
+.check-item.active .check-icon .spinner{width:12px;height:12px;border-width:2px}
+
+.helper-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;font-size:13px;color:var(--g500)}
+.version-badge{background:var(--g100);padding:2px 8px;border-radius:4px;font-weight:600;color:var(--g700);font-size:12px}
+
+.section-title{font-size:15px;font-weight:700;color:var(--g900);margin:22px 0 10px;padding-bottom:6px;border-bottom:2px solid var(--g200)}
+.section-title:first-of-type{margin-top:8px}
+.sub-label{font-size:13px;font-weight:600;color:var(--g700);margin:10px 0 6px}
+.block{background:#fff;border:1px solid var(--g200);border-radius:10px;margin-bottom:10px;position:relative}
+.block.flagged{border-color:#FCD34D;background:#FFFCF5;box-shadow:0 0 0 2px rgba(217,119,6,.12)}
+.block-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px 0;gap:8px}
+.block-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--g400)}
+.block-body{padding:8px 14px 14px;outline:none;min-height:40px;color:var(--g800);line-height:1.65}
+.block-body ul{padding-left:20px}.block-body li{margin-bottom:4px}
+
+.activity{background:#fff;border:1px solid var(--g200);border-radius:12px;margin-bottom:14px;overflow:hidden}
+.activity.flagged{border-color:#FCD34D;box-shadow:0 0 0 2px rgba(217,119,6,.12)}
+.activity-head{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--g50);border-bottom:1px solid var(--g200);gap:10px;cursor:pointer;user-select:none}
+.activity-head:hover{background:var(--g100)}
+.activity-head-left{display:flex;align-items:center;gap:10px;min-width:0;flex:1}
+.activity-head h4{font-size:14px;font-weight:700;color:var(--g900)}
+.activity-chevron{color:var(--g400);font-size:12px;transition:transform .2s;flex-shrink:0;line-height:1}
+.activity.collapsed .activity-chevron{transform:rotate(-90deg)}
+.activity.collapsed .activity-inner{display:none}
+.activity.collapsed .activity-head{border-bottom:none}
+.activity-badges{display:flex;align-items:center;gap:4px;flex-shrink:0;flex-wrap:wrap}
+.activity-badge{display:inline-flex;align-items:center;padding:2px 7px;border-radius:4px;font-size:11px;font-weight:600;background:var(--blue-s);color:var(--blue);border:1px solid var(--blue-b)}
+.activity-inner{padding:12px 14px 6px}
+.nested{margin-bottom:8px}
+.nested .block-label{color:var(--blue)}
+.flag-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;background:var(--as);border:1px solid #FDE68A;color:var(--amber);font-size:11px;font-weight:600;margin-left:8px}
+
+/* Shimmer skeleton */
+.shimmer{background:linear-gradient(90deg,var(--g100) 25%,var(--g200) 50%,var(--g100) 75%);background-size:200% 100%;animation:shimmer 1.4s ease-in-out infinite;border-radius:6px;height:14px;margin:6px 0}
+.shimmer.w60{width:60%}.shimmer.w80{width:80%}.shimmer.w90{width:90%}.shimmer.w40{width:40%}.shimmer.w70{width:70%}.shimmer.h20{height:20px}.shimmer.h48{height:48px;margin:8px 0}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){
+  .shimmer{animation:none;background:var(--g100)}
+  .spinner,.badge-running .pulse-dot{animation:none}
+  .tip-row{transition:none}
+}
+
+.spinner{width:16px;height:16px;border:2px solid var(--blue-b);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.check-circle{width:18px;height:18px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+
+.sidebar-section{margin-bottom:24px}
+.sidebar-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--g400);margin-bottom:10px}
+.sidebar-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:6px;font-size:13px;color:var(--g600);cursor:pointer}
+.sidebar-item:hover{background:var(--g50)}.sidebar-item.active{background:var(--blue-s);color:var(--blue);font-weight:550}
+.sidebar-sub{padding-left:18px;font-size:12px;color:var(--g500)}
+
+.wait-actions{display:flex;gap:10px;margin:8px 0 10px;flex-wrap:wrap}
+
+/* Blocked error card */
+.error-card{display:none;background:#fff;border:1px solid var(--g200);border-radius:12px;padding:28px 24px;text-align:center;margin:12px 0 16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.error-card.show{display:block}
+.error-icon{width:48px;height:48px;border-radius:50%;background:var(--rs);color:var(--red);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 14px}
+.error-card h2{font-size:18px;font-weight:700;color:var(--g900);margin-bottom:6px}
+.error-card p{color:var(--g500);font-size:13px;margin-bottom:8px;line-height:1.55;max-width:380px;margin-left:auto;margin-right:auto}
+.error-note{font-size:12px;color:var(--g400);margin-bottom:18px}
+.error-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+/* Toast */
+.toast{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--g900);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;box-shadow:0 12px 40px rgba(0,0,0,.18);z-index:200;opacity:0;transition:all .3s;pointer-events:none;display:flex;align-items:center;gap:12px}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
+.toast a,.toast button.toast-link{color:#93C5FD;font-weight:600;text-decoration:underline;background:none;border:none;cursor:pointer;font-size:13px;font-family:inherit;padding:0;margin-left:-4px}
+
+/* Demo panel */
+.demo-panel{position:fixed;bottom:16px;right:16px;background:#fff;border:2px solid var(--g800);border-radius:12px;padding:10px 12px;box-shadow:0 8px 24px rgba(0,0,0,.14);z-index:90;width:200px}
+.demo-panel .demo-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--g900);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.demo-panel .demo-label::before{content:'';width:8px;height:8px;border-radius:2px;background:var(--amber)}
+.demo-panel button{display:block;width:100%;text-align:left;padding:5px 8px;border-radius:6px;font-size:11px;font-weight:500;color:var(--g600);margin-bottom:2px}
+.demo-panel button:hover{background:var(--g100);color:var(--g800)}
+.demo-panel button.active{background:var(--blue-s);color:var(--blue);font-weight:600}
+.demo-panel .demo-toggle{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;margin-top:6px;border-top:1px solid var(--g200);font-size:11px;color:var(--g600)}
+.demo-panel .toggle-sw{width:32px;height:18px;border-radius:9px;background:var(--g200);position:relative;cursor:pointer;transition:background .2s}
+.demo-panel .toggle-sw.on{background:var(--blue)}
+.demo-panel .toggle-sw::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 2px rgba(0,0,0,.15)}
+.demo-panel .toggle-sw.on::after{left:16px}
+
+.sgk-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:4px;background:var(--as);border:1px solid #FDE68A;color:var(--amber);font-size:11px;font-weight:600}
+
+.khbd-title{text-align:center;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--g900);margin:4px 0 12px}
+.content-filled{display:none}
+.content-skeleton{display:block}
+body.state-done .content-filled,body.state-flagged .content-filled{display:block}
+body.state-done .content-skeleton,body.state-flagged .content-skeleton{display:none}
+body.state-blocked .content-skeleton,body.state-blocked .content-filled,body.state-blocked .checklist,body.state-blocked .wait-actions,body.state-blocked .khbd-title,body.state-blocked .helper-row{display:none}
+body.state-blocked .error-card{display:block}
+body.state-done .wait-banner,body.state-flagged .wait-banner{/* keep visible with different style */}
+body.state-done .checklist,body.state-flagged .checklist{display:none}
+body.state-done .slow-notice,body.state-flagged .slow-notice,body.state-blocked .slow-notice{display:none!important}
+</style>
+</head>
+<body class="state-running">
+
+<!-- ========== HOME ========== -->
+<div id="screen-home" class="screen">
+<div class="topbar">
+  <div class="topbar-left"><div class="logo" onclick="showScreen('home')"><div class="logo-mark">G</div>GiaoAn AI</div></div>
+  <div class="topbar-right"><span class="user-email">huy.le@truongthcs.edu.vn</span><div class="avatar">HL</div></div>
+</div>
+<div class="page-body">
+  <div class="page-header">
+    <div><h1>Giáo án của tôi</h1><p>4 tiết · Toán · Ngữ văn · Tiếng Anh</p></div>
+    <button class="btn btn-primary" onclick="setState('running');showScreen('editor')">+ Tạo tiết mới</button>
+  </div>
+  <div class="filters">
+    <div class="filter-chips">
+      <button class="chip active">Tất cả</button>
+      <button class="chip">Toán</button>
+      <button class="chip">Ngữ văn</button>
+      <button class="chip">Tiếng Anh</button>
+    </div>
+    <input class="home-search" type="search" placeholder="Tìm tiết…" aria-label="Tìm tiết"/>
+  </div>
+  <div class="table-card"><table>
+    <thead><tr><th style="width:38%">Tên tiết</th><th>Môn</th><th>Khối</th><th>Trạng thái</th><th>Cập nhật</th></tr></thead>
+    <tbody id="home-tbody">
+      <tr data-row="generating" onclick="showScreen('editor')">
+        <td class="name">Bài 3: Phân số bằng nhau</td>
+        <td>Toán</td><td>6</td>
+        <td id="home-gen-badge"><span class="badge badge-running"><span class="pulse-dot"></span>Đang soạn…</span></td>
+        <td>Vừa xong</td>
+      </tr>
+      <tr>
+        <td class="name">Phương trình bậc nhất một ẩn</td>
+        <td>Toán</td><td>8</td>
+        <td><span class="badge badge-generated"><span class="badge-dot"></span>Đã sinh</span></td>
+        <td>Hôm qua</td>
+      </tr>
+      <tr>
+        <td class="name">Unit 5: Holidays</td>
+        <td>Tiếng Anh</td><td>7</td>
+        <td><span class="badge badge-exported"><span class="badge-dot"></span>Đã xuất</span></td>
+        <td>2 ngày trước</td>
+      </tr>
+      <tr>
+        <td class="name">Văn bản nghị luận xã hội</td>
+        <td>Ngữ văn</td><td>9</td>
+        <td><span class="badge badge-draft"><span class="badge-dot"></span>Nháp</span></td>
+        <td>3 ngày trước</td>
+      </tr>
+    </tbody>
+  </table></div>
+</div>
+</div>
+
+<!-- ========== EDITOR / WAITING ========== -->
+<div id="screen-editor" class="screen active">
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo" onclick="showScreen('home')"><div class="logo-mark">G</div>GiaoAn AI</div>
+    <div class="breadcrumb"><span class="sep">/</span><a href="#" onclick="showScreen('home');return false;">Giáo án</a><span class="sep">/</span><span class="current" id="bc-title">Bài 3: Phân số bằng nhau</span></div>
+  </div>
+  <div class="topbar-right">
+    <button class="btn btn-ghost btn-sm" onclick="goHomeNotify()">← Về danh sách</button>
+    <div class="avatar">HL</div>
+  </div>
+</div>
+<div class="editor-layout">
+  <div class="editor-main">
+
+    <!-- Waiting / status banner -->
+    <div class="wait-banner" id="wait-banner" role="status" aria-live="polite">
+      <div class="wait-banner-top">
+        <div class="wait-banner-left">
+          <div class="spinner" id="banner-spinner"></div>
+          <div class="check-circle" id="banner-check" style="display:none">✓</div>
+          <div>
+            <div class="wait-title" id="banner-title">Đang soạn giáo án… thường mất 1–2 phút</div>
+          </div>
+        </div>
+        <div class="wait-clock" id="elapsed-clock" aria-label="Thời gian đã chờ">00:00</div>
+      </div>
+      <div class="tip-row" id="tip-row">
+        <span class="tip-label">Gợi ý</span>
+        <span id="tip-text">Mỗi hoạt động nên ghi rõ sản phẩm học sinh cần đạt</span>
+      </div>
+      <div class="slow-notice" id="slow-notice">Lâu hơn bình thường một chút. Bạn có thể về danh sách, chúng tôi sẽ báo khi xong.</div>
+    </div>
+
+    <!-- Checklist -->
+    <div class="checklist" id="checklist" aria-live="polite" aria-label="Tiến trình soạn giáo án">
+      <div class="checklist-title">Tiến trình</div>
+      <div class="check-item pending" data-step="0"><div class="check-icon"></div><span>Đọc thông tin bài học</span></div>
+      <div class="check-item pending" data-step="1"><div class="check-icon"></div><span>Soạn mục tiêu (phẩm chất, năng lực)</span></div>
+      <div class="check-item pending" data-step="2"><div class="check-icon"></div><span>Soạn thiết bị &amp; học liệu</span></div>
+      <div class="check-item pending" data-step="3"><div class="check-icon"></div><span>Soạn 4 hoạt động (HĐ1–HĐ4)</span></div>
+      <div class="check-item pending" data-step="4"><div class="check-icon"></div><span>Kiểm tra khung Phụ lục IV &amp; SGK</span></div>
+    </div>
+
+    <div class="wait-actions" id="wait-actions">
+      <button class="btn btn-secondary" onclick="goHomeNotify()">Về danh sách, báo tôi khi xong</button>
+    </div>
+
+    <!-- Blocked error -->
+    <div class="error-card" id="error-card">
+      <div class="error-icon">✕</div>
+      <h2>Chưa soạn được giáo án</h2>
+      <p>Hệ thống chưa tạo được kế hoạch bài dạy cho tiết này. Bạn có thể thử lại hoặc chỉnh thông tin bài học.</p>
+      <p class="error-note">Thử lại không tạo bản trùng — giữ nguyên thông tin đã nhập.</p>
+      <div class="error-actions">
+        <button class="btn btn-primary" onclick="retryGenerate()">Thử lại</button>
+        <button class="btn btn-secondary" onclick="editInfo()">Sửa thông tin</button>
+      </div>
+    </div>
+
+    <div class="editor-doc" id="editor-doc">
+      <div class="meta-fields" id="block-meta">
+        <div class="mf"><label>Trường</label><input id="meta-truong" type="text" value="THCS Nguyễn Du"/></div>
+        <div class="mf"><label>Tổ</label><input id="meta-to" type="text" value="Tổ Toán — Tin"/></div>
+        <div class="mf"><label>Họ tên GV</label><input id="meta-gv" type="text" value="Huy Lê"/></div>
+        <div class="mf"><label>Thời gian</label><input id="meta-tiet" type="text" value="1 tiết"/></div>
+        <div class="mf full"><label>Tên bài dạy</label><input id="meta-tenbai" type="text" value="Bài 3: Phân số bằng nhau"/></div>
+        <div class="mf"><label>Môn học / HĐGD</label><input id="meta-mon" type="text" value="Toán"/></div>
+        <div class="mf"><label>Lớp</label><input id="meta-lop" type="text" value="6"/></div>
+      </div>
+
+      <p class="khbd-title">Kế hoạch bài dạy</p>
+
+      <div class="helper-row">
+        <span class="version-badge">v1</span>
+        <span>theo khung Phụ lục IV · GV tự thẩm định</span>
+        <span class="sgk-badge" id="sgk-helper" style="display:none">⚠ Cần đối chiếu SGK</span>
+      </div>
+
+      <!-- SKELETON -->
+      <div class="content-skeleton" id="content-skeleton">
+        <div class="section-title">I. Mục tiêu</div>
+        <div class="sub-label">1. Về kiến thức</div>
+        <div class="block"><div class="block-header"><span class="block-label">Kiến thức</span></div>
+          <div class="block-body"><div class="shimmer w90"></div><div class="shimmer w70"></div><div class="shimmer w80"></div></div></div>
+        <div class="sub-label">2. Về năng lực</div>
+        <div class="block"><div class="block-header"><span class="block-label">Năng lực</span></div>
+          <div class="block-body"><div class="shimmer w80"></div><div class="shimmer w60"></div><div class="shimmer w90"></div></div></div>
+        <div class="sub-label">3. Về phẩm chất</div>
+        <div class="block"><div class="block-header"><span class="block-label">Phẩm chất</span></div>
+          <div class="block-body"><div class="shimmer w70"></div><div class="shimmer w40"></div></div></div>
+
+        <div class="section-title">II. Thiết bị dạy học và học liệu</div>
+        <div class="block"><div class="block-header"><span class="block-label">Thiết bị &amp; học liệu</span></div>
+          <div class="block-body"><div class="shimmer w90"></div><div class="shimmer w80"></div><div class="shimmer w60"></div><div class="shimmer w70"></div></div></div>
+
+        <div class="section-title">III. Tiến trình dạy học</div>
+        <div class="activity" id="sk-hd1">
+          <div class="activity-head"><div class="activity-head-left"><span class="activity-chevron">▾</span><h4>1. Mở đầu / xác định vấn đề</h4></div>
+            <div class="activity-badges"><span class="activity-badge">a</span><span class="activity-badge">b</span><span class="activity-badge">c</span><span class="activity-badge">d</span></div></div>
+          <div class="activity-inner">
+            <div class="block nested"><div class="block-header"><span class="block-label">a) Mục tiêu</span></div><div class="block-body"><div class="shimmer w80"></div><div class="shimmer w60"></div></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">b) Nội dung</span></div><div class="block-body"><div class="shimmer w90"></div><div class="shimmer w70"></div></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">c) Sản phẩm</span></div><div class="block-body"><div class="shimmer w70"></div></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">d) Tổ chức thực hiện</span></div><div class="block-body"><div class="shimmer w90"></div><div class="shimmer w80"></div><div class="shimmer w60"></div></div></div>
+          </div>
+        </div>
+        <div class="activity" id="sk-hd2">
+          <div class="activity-head"><div class="activity-head-left"><span class="activity-chevron">▾</span><h4>2. Hình thành kiến thức mới</h4></div>
+            <div class="activity-badges"><span class="activity-badge">a</span><span class="activity-badge">b</span><span class="activity-badge">c</span><span class="activity-badge">d</span></div></div>
+          <div class="activity-inner">
+            <div class="block nested"><div class="block-header"><span class="block-label">a) Mục tiêu</span></div><div class="block-body"><div class="shimmer w80"></div></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">b) Nội dung</span></div><div class="block-body"><div class="shimmer w90"></div><div class="shimmer w70"></div></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">c) Sản phẩm</span></div><div class="block-body"><div class="shimmer w60"></div></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">d) Tổ chức thực hiện</span></div><div class="block-body"><div class="shimmer w80"></div><div class="shimmer w70"></div></div></div>
+          </div>
+        </div>
+        <div class="activity" id="sk-hd3">
+          <div class="activity-head"><div class="activity-head-left"><span class="activity-chevron">▾</span><h4>3. Luyện tập</h4></div>
+            <div class="activity-badges"><span class="activity-badge">a</span><span class="activity-badge">b</span><span class="activity-badge">c</span><span class="activity-badge">d</span></div></div>
+          <div class="activity-inner">
+            <div class="block nested"><div class="block-header"><span class="block-label">a) Mục tiêu</span></div><div class="block-body"><div class="shimmer w70"></div></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">b) Nội dung</span></div><div class="block-body"><div class="shimmer w90"></div><div class="shimmer w80"></div></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">c) Sản phẩm</span></div><div class="block-body"><div class="shimmer w60"></div></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">d) Tổ chức thực hiện</span></div><div class="block-body"><div class="shimmer w80"></div><div class="shimmer w40"></div></div></div>
+          </div>
+        </div>
+        <div class="activity" id="sk-hd4">
+          <div class="activity-head"><div class="activity-head-left"><span class="activity-chevron">▾</span><h4>4. Vận dụng</h4></div>
+            <div class="activity-badges"><span class="activity-badge">a</span><span class="activity-badge">b</span><span class="activity-badge">c</span><span class="activity-badge">d</span></div></div>
+          <div class="activity-inner">
+            <div class="block nested"><div class="block-header"><span class="block-label">a) Mục tiêu</span></div><div class="block-body"><div class="shimmer w80"></div></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">b) Nội dung</span></div><div class="block-body"><div class="shimmer w70"></div></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">c) Sản phẩm</span></div><div class="block-body"><div class="shimmer w60"></div></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">d) Tổ chức thực hiện</span></div><div class="block-body"><div class="shimmer w90"></div><div class="shimmer w50"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FILLED CONTENT -->
+      <div class="content-filled" id="content-filled">
+        <div class="section-title" id="block-muctieu">I. Mục tiêu</div>
+        <div class="sub-label">1. Về kiến thức</div>
+        <div class="block" id="filled-kienthuc">
+          <div class="block-header"><span class="block-label">Kiến thức</span></div>
+          <div class="block-body"><ul>
+            <li>Nhận biết được hai phân số bằng nhau và nêu được điều kiện: a/b = c/d khi a·d = b·c (b, d ≠ 0).</li>
+            <li>Viết được một phân số dưới dạng phân số bằng nhau bằng cách nhân hoặc chia tử và mẫu cho cùng một số khác 0.</li>
+            <li>Phân biệt được phân số tối giản và phân số chưa tối giản.</li>
+          </ul></div>
+        </div>
+        <div class="sub-label">2. Về năng lực</div>
+        <div class="block">
+          <div class="block-header"><span class="block-label">Năng lực</span></div>
+          <div class="block-body"><ul>
+            <li><strong>Năng lực toán học:</strong> vận dụng quy tắc phân số bằng nhau để rút gọn và quy đồng mẫu số trong tình huống đơn giản.</li>
+            <li><strong>Năng lực giải quyết vấn đề:</strong> lựa chọn được cách biến đổi phù hợp (nhân/chia tử–mẫu) để so sánh hoặc tính toán.</li>
+            <li><strong>Năng lực giao tiếp:</strong> trình bày được lời giải rõ ràng, dùng đúng thuật ngữ (tử số, mẫu số, phân số bằng nhau).</li>
+          </ul></div>
+        </div>
+        <div class="sub-label">3. Về phẩm chất</div>
+        <div class="block">
+          <div class="block-header"><span class="block-label">Phẩm chất</span></div>
+          <div class="block-body"><ul>
+            <li>Trung thực khi trình bày và kiểm tra kết quả.</li>
+            <li>Cẩn thận, kiên trì khi thực hiện các bước biến đổi phân số.</li>
+            <li>Hợp tác khi làm việc nhóm và lắng nghe nhận xét của bạn.</li>
+          </ul></div>
+        </div>
+
+        <div class="section-title" id="block-thietbi">II. Thiết bị dạy học và học liệu</div>
+        <div class="block" id="filled-thietbi">
+          <div class="block-header">
+            <div style="display:flex;align-items:center;gap:8px"><span class="block-label">Thiết bị &amp; học liệu</span><span class="flag-tag" id="flag-thietbi" style="display:none">⚠ Cần đối chiếu SGK</span></div>
+          </div>
+          <div class="block-body"><ul>
+            <li><strong>SGK Toán 6</strong> — bài Phân số bằng nhau (đối chiếu số trang trước khi dạy).</li>
+            <li>Bảng phụ / phiếu học tập: bài tập nhận diện và viết phân số bằng nhau.</li>
+            <li>Máy chiếu (nếu có): chiếu mô hình hình học minh họa phân số.</li>
+            <li>Thẻ phân số / mảnh giấy để HS thao tác nhóm.</li>
+          </ul>
+          <p id="flag-thietbi-note" style="display:none;color:#D97706;font-size:13px;margin-top:8px">⚠ Ví dụ minh họa cần khớp thứ tự bài tập trong SGK — hãy kiểm tra lại trang bài trước khi dạy.</p>
+          </div>
+        </div>
+
+        <div class="section-title" id="block-tientrinh">III. Tiến trình dạy học</div>
+
+        <div class="activity" id="filled-hd1">
+          <div class="activity-head" onclick="this.parentElement.classList.toggle('collapsed')">
+            <div class="activity-head-left"><span class="activity-chevron">▾</span><h4>1. Mở đầu / xác định vấn đề</h4></div>
+            <div class="activity-badges"><span class="activity-badge">a</span><span class="activity-badge">b</span><span class="activity-badge">c</span><span class="activity-badge">d</span></div>
+          </div>
+          <div class="activity-inner">
+            <div class="block nested"><div class="block-header"><span class="block-label">a) Mục tiêu</span></div>
+              <div class="block-body"><p>Giúp HS nhận ra tình huống cần so sánh hoặc viết lại phân số dưới dạng bằng nhau; xác định vấn đề cần giải quyết trong tiết học.</p></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">b) Nội dung</span></div>
+              <div class="block-body"><p>Tình huống: “Một bánh được chia 4 phần bằng nhau, An ăn 2 phần. Bình nói An ăn một nửa bánh. An và Bình có cùng ý không?” HS thảo luận và đề xuất cách biểu diễn bằng phân số.</p></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">c) Sản phẩm</span></div>
+              <div class="block-body"><p>HS nêu được 2/4 và 1/2 biểu diễn cùng một lượng; đặt được câu hỏi: khi nào hai phân số bằng nhau?</p></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">d) Tổ chức thực hiện</span></div>
+              <div class="block-body"><ul>
+                <li><strong>Giao nhiệm vụ:</strong> GV nêu tình huống; yêu cầu HS suy nghĩ cá nhân rồi trao đổi cặp đôi.</li>
+                <li><strong>Thực hiện:</strong> HS ghi ý kiến; GV theo dõi, hỗ trợ HS còn lúng túng.</li>
+                <li><strong>Báo cáo:</strong> Một số HS trình bày; lớp nhận xét.</li>
+                <li><strong>Kết luận:</strong> GV chốt nhu cầu tìm quy tắc phân số bằng nhau; dẫn vào HĐ2.</li>
+              </ul></div></div>
+          </div>
+        </div>
+
+        <div class="activity collapsed" id="filled-hd2">
+          <div class="activity-head" onclick="this.parentElement.classList.toggle('collapsed')">
+            <div class="activity-head-left"><span class="activity-chevron">▾</span><h4>2. Hình thành kiến thức mới</h4><span class="flag-tag" id="flag-hd2" style="display:none">⚠ SGK</span></div>
+            <div class="activity-badges"><span class="activity-badge">a</span><span class="activity-badge">b</span><span class="activity-badge">c</span><span class="activity-badge">d</span></div>
+          </div>
+          <div class="activity-inner">
+            <div class="block nested"><div class="block-header"><span class="block-label">a) Mục tiêu</span></div>
+              <div class="block-body"><p>HS chiếm lĩnh được quy tắc: a/b = c/d ⇔ a·d = b·c (b, d ≠ 0); biết nhân/chia tử và mẫu cho cùng một số khác 0 để được phân số bằng nhau.</p></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">b) Nội dung</span></div>
+              <div class="block-body"><ul>
+                <li>HS làm việc với SGK: quan sát ví dụ 1/2 = 2/4 = 3/6.</li>
+                <li>Rút ra quy tắc nhân/chia tử–mẫu; kiểm tra bằng tích chéo.</li>
+                <li>Luyện viết phân số bằng nhau từ một phân số cho trước.</li>
+              </ul></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">c) Sản phẩm</span></div>
+              <div class="block-body"><p>Vở ghi: quy tắc phân số bằng nhau, 2–3 ví dụ đã chữa đúng.</p></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">d) Tổ chức thực hiện</span></div>
+              <div class="block-body"><ul>
+                <li><strong>Giao nhiệm vụ:</strong> GV yêu cầu HS đọc phần quy tắc trong SGK và trả lời câu hỏi định hướng.</li>
+                <li><strong>Thực hiện:</strong> HS làm việc cá nhân / nhóm 4; GV quan sát, gợi ý.</li>
+                <li><strong>Báo cáo:</strong> Đại diện nhóm trình bày quy tắc; lớp bổ sung.</li>
+                <li><strong>Kết luận:</strong> GV chốt kiến thức trên bảng; yêu cầu HS ghi vở.</li>
+              </ul></div></div>
+          </div>
+        </div>
+
+        <div class="activity collapsed" id="filled-hd3">
+          <div class="activity-head" onclick="this.parentElement.classList.toggle('collapsed')">
+            <div class="activity-head-left"><span class="activity-chevron">▾</span><h4>3. Luyện tập</h4></div>
+            <div class="activity-badges"><span class="activity-badge">a</span><span class="activity-badge">b</span><span class="activity-badge">c</span><span class="activity-badge">d</span></div>
+          </div>
+          <div class="activity-inner">
+            <div class="block nested"><div class="block-header"><span class="block-label">a) Mục tiêu</span></div>
+              <div class="block-body"><p>Củng cố kĩ năng nhận diện và viết phân số bằng nhau; phát triển năng lực trình bày lời giải.</p></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">b) Nội dung</span></div>
+              <div class="block-body"><ul>
+                <li>Bài 1: Điền số thích hợp: 2/5 = □/10 = 6/□</li>
+                <li>Bài 2: Trong các phân số sau, phân số nào bằng 3/4?</li>
+                <li>Bài 3: Viết ba phân số bằng nhau với 4/6.</li>
+                <li>Bài 4: Giải thích tại sao 5/8 ≠ 10/15.</li>
+              </ul></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">c) Sản phẩm</span></div>
+              <div class="block-body"><p>Phiếu / vở: lời giải đủ bước; đáp án đúng cho các bài luyện tập.</p></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">d) Tổ chức thực hiện</span></div>
+              <div class="block-body"><ul>
+                <li><strong>Giao nhiệm vụ:</strong> GV phát phiếu; nêu yêu cầu trình bày đủ bước.</li>
+                <li><strong>Thực hiện:</strong> HS làm cá nhân; GV hỗ trợ HS gặp khó.</li>
+                <li><strong>Báo cáo:</strong> Một số HS lên bảng; lớp đối chiếu.</li>
+                <li><strong>Kết luận:</strong> GV nhận xét sai sót phổ biến; chốt tiêu chí.</li>
+              </ul></div></div>
+          </div>
+        </div>
+
+        <div class="activity collapsed" id="filled-hd4">
+          <div class="activity-head" onclick="this.parentElement.classList.toggle('collapsed')">
+            <div class="activity-head-left"><span class="activity-chevron">▾</span><h4>4. Vận dụng</h4></div>
+            <div class="activity-badges"><span class="activity-badge">a</span><span class="activity-badge">b</span><span class="activity-badge">c</span><span class="activity-badge">d</span></div>
+          </div>
+          <div class="activity-inner">
+            <div class="block nested"><div class="block-header"><span class="block-label">a) Mục tiêu</span></div>
+              <div class="block-body"><p>Phát triển năng lực vận dụng: HS dùng phân số bằng nhau trong tình huống thực tiễn (chia phần, tỉ lệ đơn giản).</p></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">b) Nội dung</span></div>
+              <div class="block-body"><p>Nhiệm vụ về nhà: tìm một tình huống thực tế (chia bánh, pha nước uống, tỉ lệ nguyên liệu…) có thể mô hình hóa bằng phân số bằng nhau; giải thích và kiểm tra bằng tích chéo.</p></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">c) Sản phẩm</span></div>
+              <div class="block-body"><p>Báo cáo ngắn (½ trang hoặc phiếu): mô tả tình huống, các phân số bằng nhau và cách kiểm tra.</p></div></div>
+            <div class="block nested"><div class="block-header"><span class="block-label">d) Tổ chức thực hiện</span></div>
+              <div class="block-body"><ul>
+                <li><strong>Giao nhiệm vụ:</strong> GV giao bài vận dụng ngoài giờ; nêu hạn nộp và tiêu chí.</li>
+                <li><strong>Thực hiện:</strong> HS làm ở nhà; có thể hỏi GV nếu cần.</li>
+                <li><strong>Báo cáo / đánh giá:</strong> Nộp sản phẩm vào tiết phù hợp; một số HS chia sẻ.</li>
+              </ul></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="editor-sidebar">
+    <div class="sidebar-section"><div class="sidebar-title">Phụ lục IV</div>
+      <div class="sidebar-item active">Thông tin bài dạy</div>
+      <div class="sidebar-item">I. Mục tiêu</div>
+      <div class="sidebar-item sidebar-sub">1. Kiến thức · 2. Năng lực · 3. Phẩm chất</div>
+      <div class="sidebar-item">II. Thiết bị &amp; học liệu</div>
+      <div class="sidebar-item">III. Tiến trình dạy học</div>
+      <div class="sidebar-item sidebar-sub">1. Mở đầu</div>
+      <div class="sidebar-item sidebar-sub">2. Hình thành KT mới</div>
+      <div class="sidebar-item sidebar-sub">3. Luyện tập</div>
+      <div class="sidebar-item sidebar-sub">4. Vận dụng</div>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-title">Trạng thái</div>
+      <div style="font-size:12px;color:var(--g500);line-height:1.5;padding:0 4px" id="sidebar-status">Đang soạn giáo án theo khung Phụ lục IV. Meta vẫn chỉnh được trong lúc chờ.</div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <span id="toast-msg">✓ Giáo án đã soạn xong</span>
+  <button class="toast-link" id="toast-action" onclick="onToastOpen()">Mở</button>
+</div>
+
+<!-- Demo panel -->
+<div class="demo-panel" aria-label="Bảng điều khiển Demo">
+  <div class="demo-label">Demo</div>
+  <button data-demo="running" onclick="demoJump('running')" class="active">Đang soạn (t=0)</button>
+  <button data-demo="running45" onclick="demoJump('running45')">Đang soạn (t=45s)</button>
+  <button data-demo="slow" onclick="demoJump('slow')">Quá 3 phút</button>
+  <button data-demo="done" onclick="demoJump('done')">Xong</button>
+  <button data-demo="flagged" onclick="demoJump('flagged')">Flagged</button>
+  <button data-demo="blocked" onclick="demoJump('blocked')">Blocked</button>
+  <button data-demo="home" onclick="demoJump('home')">Home (đang soạn)</button>
+  <div class="demo-toggle">
+    <span>Tốc độ ×10</span>
+    <div class="toggle-sw" id="speed-toggle" onclick="toggleSpeed()" role="switch" aria-checked="false"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const TIPS = [
+    'Mỗi hoạt động nên ghi rõ sản phẩm học sinh cần đạt',
+    'Mục tiêu gồm kiến thức, năng lực và phẩm chất — viết cụ thể, quan sát được',
+    'HĐ4 (Vận dụng) thường giao ngoài lớp; ghi rõ tiêu chí đánh giá',
+    'Phần d) Tổ chức thực hiện: giao nhiệm vụ → thực hiện → báo cáo → kết luận',
+    'Đối chiếu SGK và khung Phụ lục IV trước khi nộp tổ chuyên môn'
+  ];
+
+  // Checklist thresholds in seconds (based on ~105s total generation)
+  const STEP_AT = [0, 12, 28, 45, 75]; // when each step becomes active
+  // Step i is "done" when step i+1 becomes active; last stays active until done
+
+  let state = 'running'; // running | done | flagged | blocked
+  let elapsedSec = 0;
+  let speedMul = 1;
+  let tickTimer = null;
+  let tipTimer = null;
+  let tipIdx = 0;
+  let autoFinishAt = 105; // simulate done at ~105s unless demo overrides
+  let autoMode = true; // if true, auto-transition to done when elapsed >= autoFinishAt
+
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function fmt(sec){ const m=Math.floor(sec/60), s=sec%60; return pad(m)+':'+pad(s); }
+
+  function showScreen(name){
+    $$('.screen').forEach(el => el.classList.remove('active'));
+    const el = $('#screen-'+name);
+    if(el) el.classList.add('active');
+    if(name === 'home'){
+      updateHomeBadge();
+      if(state === 'running' || state === 'slow'){
+        document.title = '⏳ Đang soạn… · GiaoAn AI';
+      }
+    }
+  }
+
+  function updateHomeBadge(){
+    const cell = $('#home-gen-badge');
+    if(!cell) return;
+    if(state === 'done' || state === 'flagged'){
+      cell.innerHTML = '<span class="badge badge-generated"><span class="badge-dot"></span>Đã sinh</span>';
+    } else if(state === 'blocked'){
+      cell.innerHTML = '<span class="badge badge-draft"><span class="badge-dot"></span>Nháp</span>';
+    } else {
+      cell.innerHTML = '<span class="badge badge-running"><span class="pulse-dot"></span>Đang soạn…</span>';
+    }
+  }
+
+  function setChecklist(sec){
+    const items = $$('.check-item');
+    let activeIdx = 0;
+    for(let i=0;i<STEP_AT.length;i++){
+      if(sec >= STEP_AT[i]) activeIdx = i;
+    }
+    if(state === 'done' || state === 'flagged'){
+      items.forEach(it => {
+        it.className = 'check-item done';
+        it.querySelector('.check-icon').innerHTML = '✓';
+      });
+      return;
+    }
+    items.forEach((it,i) => {
+      const icon = it.querySelector('.check-icon');
+      if(i < activeIdx){
+        it.className = 'check-item done';
+        icon.innerHTML = '✓';
+      } else if(i === activeIdx){
+        it.className = 'check-item active';
+        icon.innerHTML = '<div class="spinner"></div>';
+      } else {
+        it.className = 'check-item pending';
+        icon.innerHTML = '';
+      }
+    });
+  }
+
+  function applyUI(){
+    document.body.className = 'state-' + (state === 'slow' ? 'running' : state);
+    if(state === 'slow') document.body.classList.add('state-running');
+
+    const banner = $('#wait-banner');
+    const spinner = $('#banner-spinner');
+    const check = $('#banner-check');
+    const title = $('#banner-title');
+    const clock = $('#elapsed-clock');
+    const slow = $('#slow-notice');
+    const tipRow = $('#tip-row');
+    const checklist = $('#checklist');
+    const waitActions = $('#wait-actions');
+    const errorCard = $('#error-card');
+    const sgkHelper = $('#sgk-helper');
+
+    clock.textContent = fmt(elapsedSec);
+    setChecklist(elapsedSec);
+
+    // Reset flags
+    ['flag-thietbi','flag-thietbi-note','flag-hd2','sgk-helper'].forEach(id=>{
+      const el = $('#'+id); if(el) el.style.display = 'none';
+    });
+    ['filled-thietbi','filled-hd2'].forEach(id=>{
+      const el = $('#'+id); if(el) el.classList.remove('flagged');
+    });
+
+    if(state === 'blocked'){
+      document.title = 'Chưa soạn được · GiaoAn AI';
+      banner.style.display = 'none';
+      checklist.style.display = 'none';
+      waitActions.style.display = 'none';
+      tipRow.style.display = 'none';
+      errorCard.classList.add('show');
+      $('#sidebar-status').textContent = 'Không tạo được giáo án. Thử lại hoặc sửa thông tin — không tạo bản trùng.';
+      updateHomeBadge();
+      return;
+    }
+
+    errorCard.classList.remove('show');
+    banner.style.display = '';
+    tipRow.style.display = '';
+
+    if(state === 'done'){
+      document.title = '✓ Xong · GiaoAn AI';
+      banner.className = 'wait-banner done';
+      spinner.style.display = 'none';
+      check.style.display = '';
+      title.textContent = 'Giáo án đã soạn xong';
+      checklist.style.display = 'none';
+      waitActions.style.display = 'none';
+      tipRow.style.display = 'none';
+      slow.classList.remove('show');
+      $('#sidebar-status').textContent = 'Đã sinh theo khung Phụ lục IV · GV tự thẩm định trước khi nộp.';
+      updateHomeBadge();
+      return;
+    }
+
+    if(state === 'flagged'){
+      document.title = '✓ Xong · GiaoAn AI';
+      banner.className = 'wait-banner flagged';
+      spinner.style.display = 'none';
+      check.style.display = '';
+      check.style.background = 'var(--amber)';
+      title.textContent = 'Một số nội dung cần GV kiểm tra lại với SGK';
+      checklist.style.display = 'none';
+      waitActions.style.display = 'none';
+      tipRow.style.display = 'none';
+      slow.classList.remove('show');
+      sgkHelper.style.display = '';
+      const ft = $('#flag-thietbi'); if(ft) ft.style.display = '';
+      const fn = $('#flag-thietbi-note'); if(fn) fn.style.display = '';
+      const fh = $('#flag-hd2'); if(fh) fh.style.display = '';
+      const bt = $('#filled-thietbi'); if(bt) bt.classList.add('flagged');
+      const bh = $('#filled-hd2'); if(bh){ bh.classList.add('flagged'); bh.classList.remove('collapsed'); }
+      $('#sidebar-status').textContent = 'Có cảnh báo đối chiếu SGK. theo khung Phụ lục IV · GV tự thẩm định.';
+      updateHomeBadge();
+      return;
+    }
+
+    // running or slow
+    document.title = '⏳ Đang soạn… · GiaoAn AI';
+    banner.className = 'wait-banner';
+    spinner.style.display = '';
+    check.style.display = 'none';
+    check.style.background = '';
+    title.textContent = 'Đang soạn giáo án… thường mất 1–2 phút';
+    checklist.style.display = '';
+    waitActions.style.display = '';
+    tipRow.style.display = '';
+    if(state === 'slow' || elapsedSec >= 180){
+      slow.classList.add('show');
+    } else {
+      slow.classList.remove('show');
+    }
+    $('#sidebar-status').textContent = 'Đang soạn giáo án theo khung Phụ lục IV. Meta vẫn chỉnh được trong lúc chờ.';
+    updateHomeBadge();
+  }
+
+  function tick(){
+    if(state !== 'running' && state !== 'slow') return;
+    elapsedSec += 1;
+    if(elapsedSec >= 180 && state === 'running'){
+      state = 'slow';
+    }
+    applyUI();
+    if(autoMode && elapsedSec >= autoFinishAt && (state === 'running' || state === 'slow')){
+      finishDone();
+    }
+  }
+
+  function startTimers(){
+    stopTimers();
+    const interval = Math.max(50, Math.round(1000 / speedMul));
+    tickTimer = setInterval(tick, interval);
+    tipTimer = setInterval(() => {
+      tipIdx = (tipIdx + 1) % TIPS.length;
+      const el = $('#tip-text');
+      if(el) el.textContent = TIPS[tipIdx];
+    }, Math.round(8000 / speedMul));
+  }
+
+  function stopTimers(){
+    if(tickTimer){ clearInterval(tickTimer); tickTimer = null; }
+    if(tipTimer){ clearInterval(tipTimer); tipTimer = null; }
+  }
+
+  function finishDone(){
+    state = 'done';
+    stopTimers();
+    applyUI();
+    showToast('✓ Giáo án đã soạn xong —', true);
+  }
+
+  function showToast(msg, withOpen){
+    const t = $('#toast');
+    $('#toast-msg').textContent = msg;
+    $('#toast-action').style.display = withOpen ? '' : 'none';
+    t.classList.add('show');
+    clearTimeout(t._hide);
+    t._hide = setTimeout(() => t.classList.remove('show'), 8000);
+  }
+
+  window.onToastOpen = function(){
+    $('#toast').classList.remove('show');
+    showScreen('editor');
+    if(state !== 'done' && state !== 'flagged'){
+      setState('done');
+    }
+  };
+
+  window.goHomeNotify = function(){
+    showScreen('home');
+    showToast('Chúng tôi sẽ báo khi giáo án soạn xong', false);
+  };
+
+  window.retryGenerate = function(){
+    setState('running');
+  };
+
+  window.editInfo = function(){
+    // Stay on editor, show meta, clear blocked — focus first input
+    setState('running');
+    const inp = $('#meta-tenbai');
+    if(inp){ inp.focus(); inp.select(); }
+  };
+
+  window.showScreen = showScreen;
+
+  function setState(s, opts={}){
+    state = s;
+    autoMode = opts.autoMode !== false && (s === 'running' || s === 'slow');
+
+    if(s === 'running'){
+      elapsedSec = opts.elapsed != null ? opts.elapsed : 0;
+      autoFinishAt = opts.finishAt != null ? opts.finishAt : 105;
+      startTimers();
+    } else if(s === 'running45'){
+      state = 'running';
+      elapsedSec = 45;
+      autoFinishAt = 105;
+      autoMode = true;
+      startTimers();
+    } else if(s === 'slow'){
+      elapsedSec = opts.elapsed != null ? opts.elapsed : 185;
+      autoMode = false;
+      startTimers();
+    } else {
+      stopTimers();
+      if(s === 'done' || s === 'flagged'){
+        elapsedSec = opts.elapsed != null ? opts.elapsed : 98;
+      }
+      if(s === 'blocked'){
+        elapsedSec = opts.elapsed != null ? opts.elapsed : 42;
+      }
+    }
+    applyUI();
+    if(s === 'done'){
+      showToast('✓ Giáo án đã soạn xong —', true);
+    }
+  }
+  window.setState = setState;
+
+  window.demoJump = function(key){
+    $$('.demo-panel button[data-demo]').forEach(b => b.classList.toggle('active', b.dataset.demo === key));
+    const url = new URL(location.href);
+    url.searchParams.set('state', key === 'running' ? 'running' : key);
+    history.replaceState(null, '', url);
+
+    if(key === 'home'){
+      setState('running', {elapsed: 32, autoMode: true});
+      showScreen('home');
+      return;
+    }
+    showScreen('editor');
+    if(key === 'running') setState('running', {elapsed: 0});
+    else if(key === 'running45') setState('running45');
+    else if(key === 'slow') setState('slow', {elapsed: 185});
+    else if(key === 'done') setState('done');
+    else if(key === 'flagged') setState('flagged');
+    else if(key === 'blocked') setState('blocked');
+  };
+
+  window.toggleSpeed = function(){
+    speedMul = speedMul === 1 ? 10 : 1;
+    const sw = $('#speed-toggle');
+    sw.classList.toggle('on', speedMul === 10);
+    sw.setAttribute('aria-checked', speedMul === 10 ? 'true' : 'false');
+    if(state === 'running' || state === 'slow'){
+      startTimers(); // restart with new interval
+    }
+  };
+
+  // Init from URL
+  function initFromURL(){
+    const params = new URLSearchParams(location.search);
+    const s = params.get('state') || 'running';
+    const map = {
+      running: 'running',
+      running45: 'running45',
+      slow: 'slow',
+      done: 'done',
+      flagged: 'flagged',
+      blocked: 'blocked',
+      home: 'home'
+    };
+    const key = map[s] || 'running';
+    demoJump(key);
+  }
+
+  initFromURL();
+})();
+</script>
+</body>
+</html>
